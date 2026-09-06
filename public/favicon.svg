@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="KATHODE">
+  <rect width="32" height="32" rx="5" fill="#0c1a12"/>
+  <rect x="2" y="2" width="28" height="28" rx="3" fill="#07110a"/>
+  <polygon points="6,8 16,16 6,24" fill="#b8e0c4"/>
+  <rect x="18" y="9" width="8" height="14" fill="#d4f5de"/>
+</svg>
