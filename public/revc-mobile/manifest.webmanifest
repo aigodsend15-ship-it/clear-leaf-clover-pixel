@@ -1,0 +1,10 @@
+{
+  "name": "Vice City Web Mobile Lab",
+  "short_name": "VC Web",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#080b12",
+  "theme_color": "#080b12",
+  "description": "Launcher mobile experimental para o port reVC Web. Os dados do jogo vêm da cópia legal do usuário."
+}
