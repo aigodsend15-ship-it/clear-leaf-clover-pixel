@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta name="theme-color" content="#05070b" />
+  <title>reVC Web Mobile</title>
+  <style>
+    :root{font-family:Inter,system-ui,sans-serif;color:#fff;background:#05070b;touch-action:none}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body,#app{width:100%;height:100%;margin:0;overflow:hidden}
+    body{overscroll-behavior:none;background:radial-gradient(circle at 50% 25%,#172034,#05070b 58%)}
+    #game{position:absolute;inset:0;width:100%;height:100%;display:block;background:#000}
+    #hud{position:absolute;inset:0;pointer-events:none;padding:calc(12px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left))}
+    #status{pointer-events:auto;max-width:520px;margin:auto;padding:14px 16px;border:1px solid #ffffff22;border-radius:16px;background:#0b1020cc;backdrop-filter:blur(12px);box-shadow:0 18px 70px #0008}
+    #status strong{display:block;font-size:15px;margin-bottom:6px}
+    #status small{display:block;color:#b8c1d8;line-height:1.4}
+    button{font:inherit;color:inherit;border:0}
+    #choose{margin-top:12px;padding:11px 14px;border-radius:12px;background:#fff;color:#0a0d14;font-weight:750;cursor:pointer}
+    #controls{position:absolute;inset:0;display:none;pointer-events:none}
+    .pad{pointer-events:auto;position:absolute;width:132px;height:132px;border-radius:50%;border:1px solid #ffffff26;background:#0b102088;backdrop-filter:blur(8px)}
+    #move{left:max(18px,env(safe-area-inset-left));bottom:max(24px,calc(env(safe-area-inset-bottom) + 12px))}
+    #look{right:max(20px,env(safe-area-inset-right));bottom:max(112px,calc(env(safe-area-inset-bottom) + 96px));width:116px;height:116px}
+    .stick{position:absolute;left:50%;top:50%;width:52px;height:52px;transform:translate(-50%,-50%);border-radius:50%;background:#ffffff35;border:1px solid #ffffff66}
+    .action{pointer-events:auto;position:absolute;width:62px;height:62px;border-radius:50%;background:#10172dcc;border:1px solid #ffffff2b;font-weight:800;box-shadow:0 8px 26px #0007}
+    #a{right:max(20px,env(safe-area-inset-right));bottom:max(28px,calc(env(safe-area-inset-bottom) + 16px))}
+    #b{right:max(92px,calc(env(safe-area-inset-right) + 72px));bottom:max(54px,calc(env(safe-area-inset-bottom) + 42px))}
+    #menu{pointer-events:auto;position:absolute;right:max(12px,env(safe-area-inset-right));top:max(12px,env(safe-area-inset-top));padding:9px 12px;border-radius:10px;background:#0b1020aa;border:1px solid #ffffff26}
+    #perf{position:absolute;left:max(12px,env(safe-area-inset-left));top:max(12px,env(safe-area-inset-top));padding:7px 10px;border-radius:10px;background:#0008;font:12px ui-monospace,monospace;color:#dce6ff}
+    @media (pointer:coarse),(max-width:900px){#controls.ready{display:block}}
+    @media (orientation:portrait){#look{bottom:max(158px,calc(env(safe-area-inset-bottom) + 146px))}.pad{width:118px;height:118px}}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <canvas id="game" aria-label="reVC game surface"></canvas>
+    <div id="hud">
+      <div id="perf">perfil: detectando…</div>
+      <div id="status">
+        <strong>reVC Web Mobile — bootstrap</strong>
+        <small id="statusText">Selecione a pasta da sua instalação legal do GTA Vice City. Nenhum asset do jogo é distribuído por este site.</small>
+        <button id="choose" type="button">Selecionar pasta do Vice City</button>
+      </div>
+      <div id="controls">
+        <div id="move" class="pad" aria-label="Movimento"><div class="stick"></div></div>
+        <div id="look" class="pad" aria-label="Câmera"><div class="stick"></div></div>
+        <button id="a" class="action" type="button">A</button>
+        <button id="b" class="action" type="button">B</button>
+        <button id="menu" type="button">MENU</button>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="./mobile-shell.js"></script>
+</body>
+</html>
