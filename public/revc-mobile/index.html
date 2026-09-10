@@ -3,51 +3,51 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
-  <meta name="theme-color" content="#080b12" />
+  <meta name="theme-color" content="#05060a" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <link rel="manifest" href="./manifest.webmanifest" />
-  <title>Vice City Web Mobile Lab</title>
+  <title>Vice City Cloud</title>
   <style>
-    :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#fff;background:#080b12;touch-action:manipulation}
+    :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#fff;background:#05060a}
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    html,body{margin:0;min-height:100%;background:#080b12}
-    body{min-height:100dvh;background:radial-gradient(circle at 20% 0,#26365f 0,transparent 36%),radial-gradient(circle at 85% 15%,#5b2450 0,transparent 30%),#080b12;color:#fff}
-    main{width:min(980px,100%);margin:auto;padding:max(22px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(30px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left))}
-    .hero{padding:clamp(26px,5vw,56px) 0 24px}.eyebrow{letter-spacing:.16em;text-transform:uppercase;font-size:12px;color:#b9c6ea;font-weight:800}.hero h1{font-size:clamp(38px,8vw,76px);line-height:.94;margin:10px 0 16px;max-width:800px}.hero p{max-width:760px;color:#c7cee0;font-size:clamp(16px,2.8vw,20px);line-height:1.55;margin:0}
-    .actions{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0}.btn{appearance:none;border:0;border-radius:14px;padding:14px 18px;font:inherit;font-weight:850;cursor:pointer;text-decoration:none}.primary{background:#fff;color:#0a0d14}.secondary{background:#ffffff12;color:#fff;border:1px solid #ffffff24}
-    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:8px 0 20px}.card{background:#0c1220d8;border:1px solid #ffffff18;border-radius:18px;padding:18px;backdrop-filter:blur(10px)}.card b{display:block;margin-bottom:7px}.card span,.fine{color:#aeb8d0;line-height:1.45}.ok{color:#8ce99a}.warn{color:#ffd166}
-    #folderInput{display:none}.fine{font-size:13px;margin-top:18px}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}.pill{display:inline-block;border-radius:999px;padding:6px 9px;background:#ffffff10;border:1px solid #ffffff18;margin:3px 5px 3px 0}
-    @media(max-width:720px){.grid{grid-template-columns:1fr}.btn{width:100%;text-align:center}.hero{padding-top:32px}}
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#05060a}
+    body{min-height:100dvh;background:radial-gradient(circle at 16% 5%,#323d7a 0,transparent 33%),radial-gradient(circle at 85% 12%,#922d73 0,transparent 31%),linear-gradient(155deg,#080a13 0,#040509 70%)}
+    #launcher{position:absolute;inset:0;display:grid;place-items:center;padding:max(20px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left))}
+    .panel{width:min(920px,100%);border:1px solid #ffffff1d;background:#090d17d9;backdrop-filter:blur(20px);border-radius:28px;padding:clamp(24px,5vw,52px);box-shadow:0 30px 120px #0009}
+    .eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#c4cdf3;font-weight:900}.live{display:inline-flex;align-items:center;gap:8px;margin-left:10px}.dot{width:8px;height:8px;border-radius:50%;background:#ffcc66;box-shadow:0 0 20px currentColor}
+    h1{font-size:clamp(42px,8vw,82px);line-height:.92;margin:13px 0 18px;letter-spacing:-.05em;max-width:780px}p{color:#bbc4d9;font-size:clamp(16px,2.4vw,19px);line-height:1.55;max-width:760px;margin:0}
+    .features{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:24px 0}.feature{border:1px solid #ffffff17;background:#ffffff09;border-radius:16px;padding:14px}.feature b{display:block;font-size:13px;margin-bottom:4px}.feature span{font-size:12px;color:#9fa9c2}
+    .actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.btn{border:0;border-radius:14px;padding:14px 20px;font:inherit;font-weight:900;cursor:pointer}.primary{background:#fff;color:#090b12}.secondary{background:#ffffff0d;color:#fff;border:1px solid #ffffff20}.btn:disabled{opacity:.45;cursor:not-allowed}
+    #nodeState{font:12px ui-monospace,SFMono-Regular,Menlo,monospace;color:#aab5cf}.ok{color:#7ee787}.warn{color:#ffcc66}.bad{color:#ff7b72}
+    #stream{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000;display:none}.streaming #stream{display:block}.streaming #launcher{display:none}
+    #touchHint{display:none;position:absolute;z-index:4;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);padding:8px 12px;border-radius:999px;background:#000a;border:1px solid #ffffff20;font-size:12px;pointer-events:none}
+    .streaming.coarse #touchHint{display:block}
+    @media(max-width:760px){.features{grid-template-columns:1fr 1fr}.panel{border-radius:22px}.actions .btn{width:100%}}
+    @media(max-width:420px){.features{grid-template-columns:1fr 1fr}.feature{padding:11px}h1{font-size:42px}}
   </style>
 </head>
 <body>
-<main>
-  <section class="hero">
-    <div class="eyebrow">WebAssembly · WebGL 2 · Mobile</div>
-    <h1>Vice City no navegador, com foco em celular.</h1>
-    <p>Launcher experimental para o port reVC Web. O motor é carregado separadamente dos dados do jogo: cidade, carros, modelos, missões e áudio vêm da sua própria instalação legal do GTA Vice City.</p>
-    <div class="actions">
-      <a class="btn primary" id="play" href="https://revc.wasm.ltd/" rel="noopener">Jogar agora no reVC Web</a>
-      <button class="btn secondary" id="checkFolder" type="button">Verificar minha pasta do Vice City</button>
-      <input id="folderInput" type="file" webkitdirectory directory multiple />
-    </div>
-  </section>
-
-  <section class="grid">
-    <div class="card"><b>Perfil automático</b><span id="profile">Analisando aparelho…</span></div>
-    <div class="card"><b>Gráficos</b><span id="graphics">Detectando WebGL 2…</span></div>
-    <div class="card"><b>Armazenamento</b><span id="storage">Detectando OPFS…</span></div>
-  </section>
-
-  <section class="card">
-    <b>O que estamos aproveitando</b>
-    <span class="pill">reVC real</span><span class="pill">WASM</span><span class="pill">WebGL 2 / GLES3</span><span class="pill">streaming de assets</span><span class="pill">IndexedDB / OPFS</span><span class="pill">touch</span><span class="pill">gamepad</span><span class="pill">PWA</span>
-    <p class="fine">Para desempenho mobile, a estratégia é preservar o motor original e reduzir custo de I/O e renderização: resolução adaptativa, cache local, carregamento sob demanda e controles touch. O launcher não hospeda arquivos comerciais da Rockstar.</p>
-  </section>
-
-  <p id="status" class="fine mono">Pronto.</p>
-</main>
-<script type="module" src="./mobile-shell.js"></script>
+  <div id="launcher">
+    <main class="panel">
+      <div class="eyebrow">Cloud Gaming · Browser Only <span class="live"><span class="dot"></span><span id="modeLabel">detectando</span></span></div>
+      <h1>Vice City na nuvem. Entrou, jogou.</h1>
+      <p>O jogo roda integralmente no servidor. Este aparelho recebe somente vídeo e áudio e envia os controles. Nada de pasta do jogo, instalação local ou download dos arquivos do GTA para o dispositivo.</p>
+      <section class="features">
+        <div class="feature"><b>PC</b><span>teclado, mouse e gamepad</span></div>
+        <div class="feature"><b>Celular</b><span>touch e gamepad Bluetooth</span></div>
+        <div class="feature"><b>TV</b><span>browser + controle</span></div>
+        <div class="feature"><b>Servidor</b><span>Selkies + H.264/Opus</span></div>
+      </section>
+      <div class="actions">
+        <button id="play" class="btn primary" type="button">JOGAR</button>
+        <button id="fullscreen" class="btn secondary" type="button">Tela cheia</button>
+        <span id="nodeState">verificando nó de jogo…</span>
+      </div>
+    </main>
+  </div>
+  <iframe id="stream" allow="autoplay; fullscreen; gamepad; clipboard-read; clipboard-write" referrerpolicy="no-referrer"></iframe>
+  <div id="touchHint">controles touch ativos no stream</div>
+  <script type="module" src="./mobile-shell.js"></script>
 </body>
 </html>
