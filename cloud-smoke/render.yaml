@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: vice-cloud-smoke
+    runtime: docker
+    plan: free
+    dockerfilePath: ./cloud-smoke/Dockerfile
+    envVars:
+      - key: SELKIES_ENABLE_HTTPS
+        value: "false"
+      - key: SELKIES_ENABLE_BASIC_AUTH
+        value: "false"
+      - key: SELKIES_USE_CPU
+        value: "true"
+      - key: SELKIES_ENCODER
+        value: h264enc
+      - key: SELKIES_FRAMERATE
+        value: "24-24"
+      - key: SELKIES_VIDEO_BITRATE
+        value: "1200-1200"
+      - key: SELKIES_MANUAL_WIDTH
+        value: "854"
+      - key: SELKIES_MANUAL_HEIGHT
+        value: "480"
