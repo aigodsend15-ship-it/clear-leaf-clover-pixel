@@ -1,109 +1,131 @@
 const $ = (s) => document.querySelector(s);
 const status = $('#status');
-const statusText = $('#statusText');
-const choose = $('#choose');
-const controls = $('#controls');
-const perf = $('#perf');
-const canvas = $('#game');
+const profileEl = $('#profile');
+const graphicsEl = $('#graphics');
+const storageEl = $('#storage');
+const checkFolder = $('#checkFolder');
+const folderInput = $('#folderInput');
 
 const deviceMemory = navigator.deviceMemory ?? 4;
 const cores = navigator.hardwareConcurrency ?? 4;
-const lowEnd = deviceMemory <= 4 || cores <= 4;
-const profile = lowEnd ? 'mobile-low' : (deviceMemory >= 8 && cores >= 8 ? 'mobile-high' : 'mobile-balanced');
-const renderScale = profile === 'mobile-low' ? 0.70 : profile === 'mobile-high' ? 1 : 0.85;
+const coarse = matchMedia('(pointer: coarse)').matches;
+const mobileViewport = Math.min(innerWidth, innerHeight) <= 900;
 
-window.REVC_WEB_MOBILE = {
-  profile,
-  renderScale,
-  gameDirectoryHandle: null,
-  emit(type, detail) {
-    window.dispatchEvent(new CustomEvent(`revc:${type}`, { detail }));
-  },
+function detectWebGL2() {
+  const canvas = document.createElement('canvas');
+  try {
+    const gl = canvas.getContext('webgl2', {
+      alpha: false,
+      antialias: false,
+      depth: true,
+      stencil: false,
+      desynchronized: true,
+      powerPreference: 'high-performance',
+    });
+    if (!gl) return { ok: false };
+    return {
+      ok: true,
+      renderer: gl.getParameter(gl.RENDERER),
+      maxTexture: gl.getParameter(gl.MAX_TEXTURE_SIZE),
+    };
+  } catch {
+    return { ok: false };
+  }
+}
+
+function chooseProfile() {
+  const pixels = innerWidth * innerHeight * Math.min(devicePixelRatio || 1, 2) ** 2;
+  let score = 0;
+  if (deviceMemory >= 8) score += 2;
+  else if (deviceMemory >= 6) score += 1;
+  if (cores >= 8) score += 2;
+  else if (cores >= 6) score += 1;
+  if (pixels > 5_000_000) score -= 1;
+  if (score <= 1) return { name: 'mobile-low', scale: 0.70, fps: 30 };
+  if (score >= 4) return { name: 'mobile-high', scale: 1.0, fps: 60 };
+  return { name: 'mobile-balanced', scale: 0.85, fps: 60 };
+}
+
+const graphics = detectWebGL2();
+const perf = chooseProfile();
+
+window.REVC_MOBILE_PROFILE = {
+  ...perf,
+  deviceMemory,
+  cores,
+  coarsePointer: coarse,
+  mobileViewport,
+  webgl2: graphics.ok,
 };
 
-perf.textContent = `${profile} · scale ${renderScale.toFixed(2)} · ${cores} threads`;
+profileEl.innerHTML = `<span class="${perf.name === 'mobile-low' ? 'warn' : 'ok'}">${perf.name}</span> · render scale ${perf.scale.toFixed(2)} · alvo ${perf.fps} FPS · ${cores} threads lógicas`;
+graphicsEl.innerHTML = graphics.ok
+  ? `<span class="ok">WebGL 2 disponível</span> · textura máx. ${graphics.maxTexture}px`
+  : '<span class="warn">WebGL 2 indisponível</span> · o motor reVC Web não deve iniciar neste navegador.';
 
-function resizeCanvas() {
-  const dpr = Math.min(devicePixelRatio || 1, profile === 'mobile-low' ? 1.25 : 2);
-  canvas.width = Math.max(1, Math.round(innerWidth * dpr * renderScale));
-  canvas.height = Math.max(1, Math.round(innerHeight * dpr * renderScale));
-  window.REVC_WEB_MOBILE.emit('resize', { width: canvas.width, height: canvas.height, dpr, renderScale });
+const opfs = !!navigator.storage?.getDirectory;
+storageEl.innerHTML = opfs
+  ? '<span class="ok">OPFS disponível</span> · adequado para cache persistente e saves.'
+  : '<span class="warn">OPFS não detectado</span> · usar IndexedDB/fallback do navegador.';
+
+function normalize(path) {
+  return path.replaceAll('\\', '/').toLowerCase();
 }
-addEventListener('resize', resizeCanvas, { passive: true });
-resizeCanvas();
 
-async function validateViceCityFolder(root) {
+function validateFileList(files) {
+  const paths = new Set([...files].map((file) => normalize(file.webkitRelativePath || file.name)));
+  const hasSuffix = (suffix) => [...paths].some((p) => p.endsWith(suffix));
   const missing = [];
-  const tests = [
-    ['models/gta3.img', async () => (await root.getDirectoryHandle('models')).getFileHandle('gta3.img')],
-    ['data/gta_vc.dat', async () => (await root.getDirectoryHandle('data')).getFileHandle('gta_vc.dat')],
-    ['audio/', async () => root.getDirectoryHandle('audio')],
-  ];
-  for (const [label, test] of tests) {
-    try { await test(); } catch { missing.push(label); }
-  }
+  if (!hasSuffix('/models/gta3.img') && !paths.has('models/gta3.img')) missing.push('models/gta3.img');
+  if (!hasSuffix('/data/gta_vc.dat') && !paths.has('data/gta_vc.dat')) missing.push('data/gta_vc.dat');
+  const hasAudio = [...paths].some((p) => p.includes('/audio/') || p.startsWith('audio/'));
+  if (!hasAudio) missing.push('audio/');
   return missing;
 }
 
-choose.addEventListener('click', async () => {
-  if (!('showDirectoryPicker' in window)) {
-    statusText.textContent = 'Este navegador não oferece File System Access API. Use uma versão recente do Chrome/Edge no Android ou implemente o fallback OPFS/import.';
-    return;
-  }
-  try {
-    const handle = await window.showDirectoryPicker({ mode: 'read' });
-    const missing = await validateViceCityFolder(handle);
-    if (missing.length) {
-      statusText.textContent = `A pasta selecionada não parece ser uma instalação completa do Vice City. Ausente: ${missing.join(', ')}.`;
+checkFolder.addEventListener('click', async () => {
+  if ('showDirectoryPicker' in window) {
+    try {
+      const root = await window.showDirectoryPicker({ mode: 'read' });
+      const missing = [];
+      try { await (await root.getDirectoryHandle('models')).getFileHandle('gta3.img'); } catch { missing.push('models/gta3.img'); }
+      try { await (await root.getDirectoryHandle('data')).getFileHandle('gta_vc.dat'); } catch { missing.push('data/gta_vc.dat'); }
+      try { await root.getDirectoryHandle('audio'); } catch { missing.push('audio/'); }
+      status.textContent = missing.length
+        ? `Pasta incompleta: faltando ${missing.join(', ')}.`
+        : 'Instalação compatível detectada. Abra “Jogar agora” e selecione esta mesma instalação no reVC Web.';
+      return;
+    } catch (error) {
+      if (error?.name === 'AbortError') return;
+      status.textContent = `Falha ao verificar pasta: ${error?.message ?? error}`;
       return;
     }
-    window.REVC_WEB_MOBILE.gameDirectoryHandle = handle;
-    statusText.textContent = 'Arquivos originais detectados. A camada WASM pode agora montar/streamar essa instalação sem redistribuir os assets.';
-    controls.classList.add('ready');
-    window.REVC_WEB_MOBILE.emit('game-folder-ready', { handle, profile, renderScale });
-  } catch (error) {
-    if (error?.name !== 'AbortError') statusText.textContent = `Falha ao abrir a pasta: ${error?.message ?? error}`;
   }
+  folderInput.click();
 });
 
-function bindPad(el, name) {
-  const stick = el.querySelector('.stick');
-  let active = null;
-  const radius = el.clientWidth / 2;
-  const update = (e) => {
-    const r = el.getBoundingClientRect();
-    let x = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
-    let y = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
-    const mag = Math.hypot(x, y);
-    if (mag > 1) { x /= mag; y /= mag; }
-    stick.style.transform = `translate(calc(-50% + ${x * radius * .55}px),calc(-50% + ${y * radius * .55}px))`;
-    window.REVC_WEB_MOBILE.emit('axis', { name, x, y });
-  };
-  const reset = () => {
-    active = null;
-    stick.style.transform = 'translate(-50%,-50%)';
-    window.REVC_WEB_MOBILE.emit('axis', { name, x: 0, y: 0 });
-  };
-  el.addEventListener('pointerdown', (e) => { active = e.pointerId; el.setPointerCapture(active); update(e); });
-  el.addEventListener('pointermove', (e) => { if (e.pointerId === active) update(e); });
-  el.addEventListener('pointerup', reset);
-  el.addEventListener('pointercancel', reset);
-}
+folderInput.addEventListener('change', () => {
+  const missing = validateFileList(folderInput.files || []);
+  status.textContent = missing.length
+    ? `Pasta incompleta: faltando ${missing.join(', ')}.`
+    : 'Instalação compatível detectada. Abra “Jogar agora” e selecione esta mesma instalação no reVC Web.';
+});
 
-bindPad($('#move'), 'move');
-bindPad($('#look'), 'look');
-
-for (const id of ['a', 'b', 'menu']) {
-  const el = $(`#${id}`);
-  const send = (pressed) => window.REVC_WEB_MOBILE.emit('button', { name: id, pressed });
-  el.addEventListener('pointerdown', () => send(true));
-  el.addEventListener('pointerup', () => send(false));
-  el.addEventListener('pointercancel', () => send(false));
+let wakeLock;
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
+  } catch {}
 }
 
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) window.REVC_WEB_MOBILE.emit('suspend', {});
-  else window.REVC_WEB_MOBILE.emit('resume', {});
+  if (!document.hidden && wakeLock?.released) requestWakeLock();
 });
 
-window.REVC_WEB_MOBILE.emit('shell-ready', { profile, renderScale, canvas });
+$('#play').addEventListener('pointerdown', requestWakeLock, { once: true });
+
+if ('serviceWorker' in navigator) {
+  addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+}
+
+status.textContent = `Diagnóstico concluído: ${perf.name}; WebGL2=${graphics.ok ? 'sim' : 'não'}; OPFS=${opfs ? 'sim' : 'não'}; memória informada=${deviceMemory} GB.`;
